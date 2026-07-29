@@ -5,6 +5,8 @@ Claude·Cursor 등 AI 에이전트에 설치하면, 네이버 공식 웹마스�
 
 > A Claude Skill that turns any AI agent into a Naver Search (Search Advisor) SEO expert, grounded in the full official Korean webmaster guide.
 
+Claude Code에서는 플러그인으로 **두 줄이면 설치**된다 → [설치](#설치)
+
 ---
 
 ## 왜 필요한가
@@ -26,6 +28,7 @@ AI에게 "네이버 SEO 봐줘"라고 하면 대부분 **구글 SEO 지식을 �
 
 ```
 SKILL.md                  스킬 본문 — 라우팅 표, 워크플로, 하드 룰
+.claude-plugin/           Claude Code 플러그인 매니페스트 (이 저장소 = 마켓플레이스)
 references/
   INDEX.md                55개 문서 카테고리별 색인
   guide/                  네이버 공식 가이드 원문 55개 (Markdown)
@@ -40,20 +43,39 @@ tools/
 
 ## 설치
 
-### Claude Code (권장)
+### Claude Code (권장) — 플러그인
 
-플러그인으로 설치한다. 이 저장소가 곧 마켓플레이스다.
+이 저장소가 곧 마켓플레이스다. **실행 중인 Claude Code 세션의 입력창에** 아래 두 줄을 차례로 친다.
+(터미널이 아니라 Claude Code 안이다. `>` 프롬프트가 뜬 상태에서 `/`로 시작하는 명령이다.)
 
 ```
 /plugin marketplace add JaceProgramming/naver-seo-expert
+```
+```
 /plugin install naver-seo-expert@naver-seo-expert
 ```
 
-설치하면 네이버 SEO 관련 질문에서 자동으로 활성화되고, `/naver-seo-expert` 로 직접 호출할 수도 있다.
-업데이트·삭제는 `/plugin` 에서 한다.
+`/plugin` 명령이 목록에 없으면 Claude Code가 구버전이다. `claude update` 로 올린 뒤 다시 시도한다.
+
+<details>
+<summary>터미널에서 설치하기 (Claude Code를 안 켜고)</summary>
+
+```bash
+claude plugin marketplace add JaceProgramming/naver-seo-expert
+claude plugin install naver-seo-expert@naver-seo-expert
+```
+</details>
+
+**설치 확인** — 세션에서 `/plugin` 을 열면 `naver-seo-expert` 가 enabled 로 보인다.
+터미널에서는 `claude plugin list` 로도 확인된다. 목록에 안 뜨면 `/reload-plugins` 또는 세션 재시작.
+
+설치하면 네이버 SEO 관련 질문에서 **자동으로 활성화**된다. `/naver-seo-expert` 로 직접 부를 수도 있다.
+업데이트·비활성화·삭제는 모두 `/plugin` 에서 한다.
 
 <details>
 <summary>플러그인 대신 스킬로 직접 설치하기</summary>
+
+플러그인 시스템을 쓰고 싶지 않다면 스킬 디렉터리에 그냥 클론해도 된다.
 
 ```bash
 git clone https://github.com/JaceProgramming/naver-seo-expert.git \
