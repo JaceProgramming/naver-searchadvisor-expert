@@ -148,7 +148,11 @@ Allow: /
 node scripts/audit.mjs https://example.com
 ```
 
-기계적으로 확인되는 항목(robots.txt, canonical, 로봇 메타, title/description, OG, viewport, 파비콘, JSON-LD, 리다이렉트 체인, Yeti 접근성)을 먼저 뽑는다. 그다음:
+기계적으로 확인되는 항목을 먼저 뽑는다 — robots.txt, canonical, 로봇 메타, title/description, OG, viewport, 파비콘, JSON-LD, 리다이렉트 체인, Yeti 접근성, 그리고 **페이지 경로만 봐서는 안 잡히는 것들**(구성 리소스가 `Disallow`에 걸리는지, apex↔www robots.txt 분기, `javascript:` 링크, 프로토콜 혼용).
+
+리소스 차단은 특히 놓치기 쉽다. 페이지 자체는 200이고 수집 허용인데 CSS/JS가 막혀 있으면 로봇이 문서를 온전히 해석하지 못한다 (`resource-and-link`). "다 열어놨는데 왜 안 나오죠?"의 흔한 정체다.
+
+그다음:
 
 1. 스크립트가 잡은 각 이슈에 대해 해당 원문을 읽고 **왜 문제인지 + 어떻게 고치는지**를 근거와 함께 설명
 2. 스크립트로 판정 불가한 항목(콘텐츠 품질, 스팸 소지, 주제 일관성)은 `14-content-abusing.md`·`15-content-basic.md` 기준으로 사람이 판단하도록 체크리스트 제시

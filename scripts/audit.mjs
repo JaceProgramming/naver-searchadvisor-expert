@@ -279,6 +279,7 @@ async function audit(target) {
   // 3) robots.txt
   const robotsUrl = origin + '/robots.txt';
   let robots = null;
+  let robotsRaw = '';
   try {
     const r = await get(robotsUrl, { redirect: 'follow' });
     const ct = (r.headers.get('content-type') || '').toLowerCase();
@@ -305,6 +306,18 @@ async function audit(target) {
       }
 
       robots = parseRobots(body);
+      robotsRaw = body;
+
+      // 지시자 이름과 콜론 사이의 공백은 RFC 9309 문법상 허용되지만,
+      // 엄격한 파서는 그 줄을 통째로 버린다. Yeti 전용 그룹이 이런 형태면
+      // 사이트 전체 수집 정책이 파서 관용도에 걸린 셈이라 반드시 알려야 한다.
+      const loose = body.split(/\r?\n/).filter((l) => /^\s*user-agent\s+:/i.test(l));
+      if (loose.length)
+        add('INDEX', 'robots-loose-syntax',
+          `robots.txt에 지시자와 콜론 사이가 벌어진 줄이 ${loose.length}개 있습니다: ${loose.map((l) => `"${l.trim()}"`).join(', ')}`,
+          'seo-basic-robots',
+          '표준 문법상 허용되지만 엄격한 파서는 이 줄을 무시합니다. 공백을 제거해 "User-agent: Yeti" 형태로 맞추세요.');
+
       const yeti = robotsVerdict(robots, 'yeti', url.pathname);
       if (!yeti.allowed) {
         add('BLOCK', 'robots-disallow',
@@ -515,6 +528,105 @@ async function audit(target) {
     add('SERP', 'img-no-alt',
       `이미지 ${imgs.length}개 중 ${noAlt}개에 alt가 없습니다.`, 'content-basic',
       '검색로봇은 이미지 속 텍스트를 인식하기 어렵습니다. 핵심 정보는 텍스트나 alt로 제공하세요.');
+
+  // ── 페이지 구성 리소스가 robots.txt로 차단되는지 ────────────────────
+  // 페이지 자체는 허용인데 CSS/JS가 막히면 로봇이 문서를 제대로 해석하지 못한다.
+  // 가이드가 명시적으로 경고하는 항목이고, 페이지 경로만 봐서는 절대 안 잡힌다.
+  const resources = { CSS: [], JS: [], 이미지: [], 기타: [] };
+  for (const l of links)
+    if (/(^|\s)stylesheet(\s|$)/i.test(l.rel || '') && l.href) resources.CSS.push(l.href);
+  for (const s of tags(html, 'script')) if (s.src) resources.JS.push(s.src);
+  for (const i of imgs) if (i.src) resources['이미지'].push(i.src);
+  if (og.image) resources['기타'].push(og.image);
+  if (favicon?.href) resources['기타'].push(favicon.href);
+
+  const resolve = (r) => { try { return new URL(r, finalUrl); } catch { return null; } };
+
+  if (robots) {
+    /** agent 기준으로 리소스 차단 현황을 센다. */
+    const scan = (agent) => {
+      const out = {};
+      let same = 0, blocked = 0;
+      for (const [kind, list] of Object.entries(resources)) {
+        const urls = [...new Set(list)].map(resolve).filter((u) => u && u.origin === origin);
+        const bad = urls.filter((u) => !robotsVerdict(robots, agent, u.pathname).allowed);
+        same += urls.length;
+        blocked += bad.length;
+        if (bad.length)
+          out[kind] = { n: bad.length, of: urls.length,
+            rules: [...new Set(bad.map((u) => robotsVerdict(robots, agent, u.pathname).reason))] };
+      }
+      return { out, same, blocked };
+    };
+
+    const describe = (r) =>
+      Object.entries(r.out).map(([k, v]) => `${k} ${v.n}/${v.of}`).join(', ');
+    const rulesOf = (r) => [...new Set(Object.values(r.out).flatMap((v) => v.rules))].join(' / ');
+
+    const asYeti = scan('yeti');
+    const asStar = scan('*');
+    const hasYetiGroupNow = robots.groups.some((g) => g.agents.includes('yeti'));
+
+    if (asYeti.blocked) {
+      const breaks = asYeti.out.CSS || asYeti.out.JS;
+      add(breaks ? 'BLOCK' : 'INDEX', 'resource-blocked',
+        `페이지는 수집 허용이지만 구성 리소스가 robots.txt로 차단됩니다 — ${describe(asYeti)}. 적용된 규칙: ${rulesOf(asYeti)}`,
+        'resource-and-link',
+        breaks
+          ? 'CSS/JS가 막히면 로봇이 문서를 온전히 해석하지 못해 미노출·오노출로 이어질 수 있습니다. 해당 경로를 Allow로 바꾸거나 Yeti 전용 예외를 추가하세요.'
+          : '문서와 동일한 규칙을 적용하거나 기본 허용으로 바꾸세요.');
+    } else if (hasYetiGroupNow && asStar.blocked) {
+      // Yeti 전용 그룹 덕분에만 리소스가 열려 있는 상태.
+      // 그 그룹이 한 줄이라도 어긋나면 곧바로 아래 수치만큼 막힌다.
+      add('INDEX', 'resource-depends-on-yeti-group',
+        `리소스 수집이 Yeti 전용 그룹 하나에만 의존합니다. 그 그룹이 무시되면 와일드카드(*) 규칙이 적용되어 ${describe(asStar)}가 차단됩니다 (${rulesOf(asStar)}).`,
+        'resource-and-link',
+        'Yeti 그룹 문법을 정확히 유지하거나, 애초에 * 그룹에서 리소스 경로를 Disallow하지 않는 편이 안전합니다.');
+    } else if (asYeti.same) {
+      add('INFO', 'resource-ok', `동일 호스트 리소스 ${asYeti.same}개 모두 수집 허용.`, 'resource-and-link');
+    }
+  }
+
+  // ── apex ↔ www 반대편 호스트의 robots.txt ───────────────────────────
+  // robots 규칙은 호스트별로만 유효하다. 한쪽이 전면 차단이면 그쪽 URL은 통째로 죽는다.
+  const otherHost = url.hostname.startsWith('www.')
+    ? url.hostname.slice(4)
+    : 'www.' + url.hostname;
+  try {
+    const or = await get(`${url.protocol}//${otherHost}/robots.txt`, { redirect: 'follow' });
+    if (or.ok) {
+      const op = parseRobots(await or.text());
+      const ov = robotsVerdict(op, 'yeti', '/');
+      if (!ov.allowed)
+        add('INDEX', 'other-host-blocked',
+          `반대편 호스트 ${otherHost} 의 robots.txt가 Yeti를 전면 차단합니다 (${ov.reason}).`,
+          'seo-basic-robots',
+          `robots.txt 규칙은 호스트별로만 유효하므로 ${url.hostname} 의 설정이 이쪽을 구제하지 못합니다. ${otherHost} 를 ${url.hostname} 로 301 리다이렉트하거나 robots.txt를 맞추세요.`);
+    }
+  } catch { /* 반대편 호스트가 없을 수 있다 — 정상 */ }
+
+  // ── 크롤 불가능한 링크 / 프로토콜 혼용 ──────────────────────────────
+  const anchors = tags(html, 'a');
+  const badHref = anchors.filter((a) => {
+    const h = (a.href || '').trim();
+    if (!h) return false;
+    return /^javascript:/i.test(h) || /^[a-zA-Z_$][\w$]*\s*\(/.test(h);
+  });
+  if (badHref.length)
+    add('INDEX', 'uncrawlable-links',
+      `<a href>가 URL이 아닌 자바스크립트 호출인 링크가 ${badHref.length}개 있습니다 (예: ${badHref[0].href.slice(0, 50)}).`,
+      'resource-and-link',
+      '로봇은 href의 URL로 다른 페이지를 발견합니다. 실제 URL을 넣으면 사이트 수집량이 늘어납니다.');
+
+  if (url.protocol === 'https:') {
+    const mixed = Object.values(resources).flat()
+      .map(resolve)
+      .filter((u) => u && u.protocol === 'http:' && u.hostname === url.hostname);
+    if (mixed.length)
+      add('INDEX', 'mixed-protocol',
+        `HTTPS 페이지인데 동일 호스트를 http:// 로 참조하는 리소스가 ${mixed.length}개 있습니다.`,
+        'resource-and-link', '리소스 URL을 페이지와 동일한 https:// 로 맞추세요.');
+  }
 
   // 5) 클로킹 점검 — 브라우저 UA와 응답 비교
   try {

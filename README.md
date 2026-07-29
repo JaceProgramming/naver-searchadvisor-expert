@@ -88,6 +88,14 @@ node scripts/audit.mjs https://example.com --json
 
 점검 항목 — 리다이렉트 체인 · HTTP 상태 · `X-Robots-Tag` · robots.txt(응답코드/Content-Type/Yeti 규칙/Sitemap) · title · description · canonical · 로봇 메타 · 오픈그래프 · **og:image 실측(150×150 초과, 5,000 byte 이상, 3:1 이내)** · viewport · 파비콘 · 구조화된 데이터 · SPA 렌더링 의존 · 이미지 alt · **Yeti UA와 브라우저 UA 응답 비교(방화벽 차단·클로킹 탐지)**
 
+페이지 경로만 보는 도구들이 놓치는 항목도 본다:
+
+- **구성 리소스 차단** — 페이지는 허용인데 CSS/JS/이미지가 `Disallow`에 걸리는 경우. 로봇이 문서를 온전히 해석하지 못한다 (`resource-and-link`). Yeti 전용 그룹 덕분에만 열려 있는 상태면 그 의존성 자체를 경고한다.
+- **apex ↔ www robots.txt 분기** — robots 규칙은 호스트별로만 유효하다. 한쪽이 `Disallow: /`면 그 호스트 URL은 통째로 죽는데 다른 쪽 설정으로는 구제되지 않는다.
+- **`User-agent :` 느슨한 문법** — 표준상 허용이지만 엄격한 파서는 그 줄을 버린다. Yeti 그룹이 이 형태면 사이트 수집 정책 전체가 파서 관용도에 걸린다.
+- **크롤 불가 링크** — `href="javascript:..."`는 로봇이 새 URL을 발견하는 경로를 끊는다.
+- **프로토콜 혼용** — HTTPS 페이지가 동일 호스트를 `http://`로 참조하는 리소스.
+
 결과는 **차단 → 색인 → 표현 → 참고** 순으로 정렬된다. og:image 비율보다 robots.txt 5xx가 먼저다.
 
 <details>
