@@ -1,0 +1,16 @@
+{
+  "name": "naver-seo-expert-tools",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "네이버 서치어드바이저 웹마스터 가이드 원문 재수집 도구",
+  "scripts": {
+    "list": "node fetch-guide.mjs --list",
+    "refresh": "OUT=../references/guide node fetch-guide.mjs && node fix-index.mjs"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  }
+}
