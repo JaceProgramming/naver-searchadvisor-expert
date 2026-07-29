@@ -521,13 +521,19 @@ async function audit(target) {
       'SSR/프리렌더링을 검토하세요. 서치어드바이저 [URL 검사]로 로봇이 실제 수집하는 HTML을 확인할 수 있습니다.');
   }
 
-  // 이미지 alt
+  // 이미지 alt — 속성 누락과 alt="" 는 다른 이야기다.
+  // alt="" 는 장식용 이미지를 표시하는 올바른 방법이므로 결함으로 세지 않는다.
   const imgs = tags(html, 'img');
-  const noAlt = imgs.filter((i) => i.alt === undefined || i.alt.trim() === '').length;
-  if (imgs.length && noAlt)
+  const missingAlt = imgs.filter((i) => i.alt === undefined).length;
+  const emptyAlt = imgs.filter((i) => i.alt !== undefined && i.alt.trim() === '').length;
+  if (missingAlt)
     add('SERP', 'img-no-alt',
-      `이미지 ${imgs.length}개 중 ${noAlt}개에 alt가 없습니다.`, 'content-basic',
-      '검색로봇은 이미지 속 텍스트를 인식하기 어렵습니다. 핵심 정보는 텍스트나 alt로 제공하세요.');
+      `이미지 ${imgs.length}개 중 ${missingAlt}개에 alt 속성이 아예 없습니다.`, 'content-basic',
+      '검색로봇은 이미지 속 텍스트를 인식하기 어렵습니다. 내용이 있는 이미지에는 alt를 넣고, 장식용이면 alt=""로 명시하세요.');
+  if (emptyAlt)
+    add('INFO', 'img-empty-alt',
+      `이미지 ${imgs.length}개 중 ${emptyAlt}개가 alt=""(장식용 표시)입니다. 이 중 실제로 정보를 담은 이미지가 있는지 확인하세요.`,
+      'content-basic');
 
   // ── 페이지 구성 리소스가 robots.txt로 차단되는지 ────────────────────
   // 페이지 자체는 허용인데 CSS/JS가 막히면 로봇이 문서를 제대로 해석하지 못한다.
