@@ -40,7 +40,20 @@ tools/
 
 ## 설치
 
-### Claude Code
+### Claude Code (권장)
+
+플러그인으로 설치한다. 이 저장소가 곧 마켓플레이스다.
+
+```
+/plugin marketplace add JaceProgramming/naver-seo-expert
+/plugin install naver-seo-expert@naver-seo-expert
+```
+
+설치하면 네이버 SEO 관련 질문에서 자동으로 활성화되고, `/naver-seo-expert` 로 직접 호출할 수도 있다.
+업데이트·삭제는 `/plugin` 에서 한다.
+
+<details>
+<summary>플러그인 대신 스킬로 직접 설치하기</summary>
 
 ```bash
 git clone https://github.com/JaceProgramming/naver-seo-expert.git \
@@ -48,7 +61,8 @@ git clone https://github.com/JaceProgramming/naver-seo-expert.git \
 ```
 
 프로젝트 단위로만 쓰려면 `<프로젝트>/.claude/skills/naver-seo-expert` 에 클론한다.
-설치 후 `/skills` 로 목록에서 확인할 수 있다.
+설치 후 `/skills` 로 목록에서 확인할 수 있다. 업데이트는 `git pull`.
+</details>
 
 ### Claude 앱 (claude.ai / 데스크톱)
 
