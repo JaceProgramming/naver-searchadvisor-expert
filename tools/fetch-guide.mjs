@@ -10,6 +10,13 @@
  *   node fetch-guide.mjs --list      목차만 출력 (네트워크 1회)
  *   node fetch-guide.mjs             out/ 에 페이지별 .md + INDEX.md 저장
  *   node fetch-guide.mjs --html      위와 동일 + out/_html/ 에 원본 HTML 보존
+ *
+ * ── 이 파일은 두 곳에 산다 ──────────────────────────────────────────────
+ *   정본  naver-doc-fetchers/searchadvisor/fetch-guide.mjs   (로컬 수집기 모음)
+ *   사본  naver-seo-expert 리포의 tools/fetch-guide.mjs      (공개 스킬. references/guide/ 재수집용)
+ *
+ * 두 파일은 바이트 동일하게 유지한다 — 배선(OUT 경로)만 각자 package.json 에서 다르게 준다.
+ * 한쪽을 고쳤으면 반드시 다른 쪽에 복사하고 `diff` 로 확인할 것.
  */
 
 import { writeFile, mkdir, rm } from 'node:fs/promises';

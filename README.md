@@ -41,6 +41,17 @@ tools/
 각 원문은 front matter에 `guid` · `source`(원문 URL) · `updated`(네이버가 명시한 수정일)를 갖는다.
 수집 시점: **2026년 7월**.
 
+네이버가 가이드를 고치면 `updated` 가 바뀐다. 직접 최신화하려면:
+
+```bash
+cd tools && npm install
+npm run list      # 목차와 수정일만 확인 (네트워크 1회)
+npm run refresh   # references/guide/ 를 다시 받고 INDEX.md 재생성
+```
+
+> `tools/fetch-guide.mjs` 는 별도 로컬 수집기(`naver-doc-fetchers/searchadvisor/`)의 **사본**이며
+> 바이트 동일하게 유지한다. 다른 건 출력 경로 배선뿐이다 — 자세한 건 파일 상단 주석 참고.
+
 ## 설치
 
 ### Claude Code (권장) — 플러그인
