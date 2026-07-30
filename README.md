@@ -1,4 +1,4 @@
-# naver-seo-expert
+# naver-searchadvisor-expert
 
 **네이버 검색(서치어드바이저) SEO 전문가 AI 스킬.**
 Claude·Cursor 등 AI 에이전트에 설치하면, 네이버 공식 웹마스터 가이드 **55개 문서 전문**을 근거로 네이버 SEO를 다룬다.
@@ -60,10 +60,10 @@ npm run refresh   # references/guide/ 를 다시 받고 INDEX.md 재생성
 (터미널이 아니라 Claude Code 안이다. `>` 프롬프트가 뜬 상태에서 `/`로 시작하는 명령이다.)
 
 ```
-/plugin marketplace add JaceProgramming/naver-seo-expert
+/plugin marketplace add JaceProgramming/naver-searchadvisor-expert
 ```
 ```
-/plugin install naver-seo-expert@naver-seo-expert
+/plugin install naver-searchadvisor-expert@naver-searchadvisor-expert
 ```
 
 `/plugin` 명령이 목록에 없으면 Claude Code가 구버전이다. `claude update` 로 올린 뒤 다시 시도한다.
@@ -72,15 +72,15 @@ npm run refresh   # references/guide/ 를 다시 받고 INDEX.md 재생성
 <summary>터미널에서 설치하기 (Claude Code를 안 켜고)</summary>
 
 ```bash
-claude plugin marketplace add JaceProgramming/naver-seo-expert
-claude plugin install naver-seo-expert@naver-seo-expert
+claude plugin marketplace add JaceProgramming/naver-searchadvisor-expert
+claude plugin install naver-searchadvisor-expert@naver-searchadvisor-expert
 ```
 </details>
 
-**설치 확인** — 세션에서 `/plugin` 을 열면 `naver-seo-expert` 가 enabled 로 보인다.
+**설치 확인** — 세션에서 `/plugin` 을 열면 `naver-searchadvisor-expert` 가 enabled 로 보인다.
 터미널에서는 `claude plugin list` 로도 확인된다. 목록에 안 뜨면 `/reload-plugins` 또는 세션 재시작.
 
-설치하면 네이버 SEO 관련 질문에서 **자동으로 활성화**된다. `/naver-seo-expert` 로 직접 부를 수도 있다.
+설치하면 네이버 SEO 관련 질문에서 **자동으로 활성화**된다. `/naver-searchadvisor-expert` 로 직접 부를 수도 있다.
 업데이트·비활성화·삭제는 모두 `/plugin` 에서 한다.
 
 <details>
@@ -89,17 +89,17 @@ claude plugin install naver-seo-expert@naver-seo-expert
 플러그인 시스템을 쓰고 싶지 않다면 스킬 디렉터리에 그냥 클론해도 된다.
 
 ```bash
-git clone https://github.com/JaceProgramming/naver-seo-expert.git \
-  ~/.claude/skills/naver-seo-expert
+git clone https://github.com/JaceProgramming/naver-searchadvisor-expert.git \
+  ~/.claude/skills/naver-searchadvisor-expert
 ```
 
-프로젝트 단위로만 쓰려면 `<프로젝트>/.claude/skills/naver-seo-expert` 에 클론한다.
+프로젝트 단위로만 쓰려면 `<프로젝트>/.claude/skills/naver-searchadvisor-expert` 에 클론한다.
 설치 후 `/skills` 로 목록에서 확인할 수 있다. 업데이트는 `git pull`.
 </details>
 
 ### Claude 앱 (claude.ai / 데스크톱)
 
-1. 이 저장소를 zip으로 내려받는다 ([Code → Download ZIP](https://github.com/JaceProgramming/naver-seo-expert/archive/refs/heads/main.zip))
+1. 이 저장소를 zip으로 내려받는다 ([Code → Download ZIP](https://github.com/JaceProgramming/naver-searchadvisor-expert/archive/refs/heads/main.zip))
 2. 압축을 풀고, `SKILL.md`가 최상위에 있는 폴더째로 다시 압축한다
 3. Settings → Capabilities → Skills → Upload
 

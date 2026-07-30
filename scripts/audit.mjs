@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * naver-seo-expert / audit.mjs
+ * naver-searchadvisor-expert / audit.mjs
  *
  * URL 하나를 네이버 서치어드바이저 웹마스터 가이드 기준으로 점검한다.
  * 의존성 없음. Node 18+ (전역 fetch).

@@ -1,5 +1,5 @@
 {
-  "name": "naver-seo-expert",
+  "name": "naver-searchadvisor-expert",
   "owner": {
     "name": "JaceProgramming",
     "url": "https://github.com/JaceProgramming"
@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "naver-seo-expert",
+      "name": "naver-searchadvisor-expert",
       "source": "./",
       "description": "네이버 검색(서치어드바이저) SEO 전문가. 네이버 웹 검색 노출/색인, robots.txt, 사이트맵·RSS 제출, 로봇 메타 태그, 오픈그래프, 구조화된 데이터(schema.org), 콘텐츠 스팸 정책, IndexNow, 수집요청 API, 웹마스터도구 진단을 다룰 때 사용한다. Naver Search (Search Advisor) SEO expert for Korean websites — indexing, crawling, markup, structured data, and search exposure.",
       "version": "1.0.0",
